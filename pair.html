@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIZA-PAIR - WhatsApp Linker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    /* Made by (hank!nd3 p4d4y41! */
+    :root { --primary-color: #000000; --secondary-color: #ffffff; --accent-color: #f0f0f0; --text-color: #000000; --background-color: #ffffff; --hover-color: #f5f5f5; --border-color: rgba(0, 0, 0, 0.1); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--background-color); color: var(--text-color); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+    .container { width: 100%; max-width: 450px; background: var(--background-color); border-radius: 16px; padding: 25px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); }
+    .header { text-align: center; margin-bottom: 25px; }
+    .logo { width: 70px; height: 70px; margin: 0 auto 16px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); }
+    .title { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--primary-color); }
+    .subtitle { font-size: 14px; color: rgba(0, 0, 0, 0.7); margin-bottom: 20px; }
+    .social-icons { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+    .social-icons a { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
+    .social-icons a.youtube { background: #FF0000; }
+    .social-icons a.telegram { background: #0088cc; }
+    .social-icons a.whatsapp { background: #0cfa10; }
+    .social-icons a.github { background: #333; }
+    .toggle-container { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: var(--hover-color); border-radius: 12px; padding: 4px; border: 1px solid var(--border-color); }
+    .toggle-option { flex: 1; padding: 10px 16px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 14px; font-weight: 500; transition: all 0.3s ease; }
+    .toggle-option.active { background: var(--primary-color); color: var(--secondary-color); }
+    .input-field { width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 12px; background: var(--background-color); color: var(--text-color); font-size: 15px; }
+    .generate-btn { width: 100%; padding: 12px; background: var(--primary-color); border: none; border-radius: 12px; color: var(--secondary-color); font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 16px; }
+    .code-display { background: var(--hover-color); padding: 12px; border-radius: 12px; text-align: center; font-size: 16px; font-weight: 600; margin-bottom: 16px; min-height: 40px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border-color); }
+    .qr-display { background: var(--hover-color); padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; display: none; }
+    .copy-btn { width: 100%; padding: 12px; background: var(--hover-color); border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .loading { display: none; text-align: center; margin: 16px 0; }
+    .loading i { font-size: 24px; color: var(--primary-color); animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: rgba(0,0,0,0.5); }
+    .hidden { display: none !important; }
+    .qr-image { max-width: 250px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo"><i class="fas fa-robot"></i></div>
+      <h1 class="title">LIZA-PAIR</h1>
+      <p class="subtitle">Link your WhatsApp device</p>
+      <div class="social-icons">
+        <a href="#" target="_blank" class="youtube"><i class="fab fa-youtube"></i></a>
+        <a href="#" target="_blank" class="telegram"><i class="fab fa-telegram-plane"></i></a>
+        <a href="#" target="_blank" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" target="_blank" class="github"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+
+    <div class="toggle-container">
+      <div class="toggle-option active" data-mode="pair"><i class="fas fa-key"></i> PAIR CODE</div>
+      <div class="toggle-option" data-mode="qr"><i class="fas fa-qrcode"></i> QR CODE</div>
+    </div>
+
+    <div class="input-group" id="inputGroup">
+      <label class="input-label">Enter your WhatsApp number with country code</label>
+      <input type="text" id="mobileNumber" class="input-field" placeholder="+918075379950">
+    </div>
+
+    <button class="generate-btn" id="submit"><i class="fas fa-key"></i> Generate Pair Code</button>
+    <div class="loading" id="loading"><i class="fas fa-spinner"></i></div>
+    <div class="code-display" id="codeDisplay">Your pair code will appear here</div>
+    <div class="qr-display" id="qrDisplay"><img id="qrImage" class="qr-image" src=""><div id="qrInstructions"></div></div>
+    <button class="copy-btn" id="copy" onclick="copyCode()"><i class="fas fa-copy"></i> Copy Code</button>
+    <div class="footer"><p>© 2026 (hank!nd3 p4d4y41! | LIZA-AI BOT</p></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    /* ENCRYPTED JAVASCRIPT LOGIC */
+    var _0x5a12=["\x63\x6C\x69\x63\x6B","\x64\x61\x74\x61\x73\x65\x74","\x6D\x6F\x64\x65","\x61\x63\x74\x69\x76\x65","\x72\x65\x6D\x6F\x76\x65","\x61\x64\x64","\x69\x6E\x6E\x65\x72\x48\x54\x4D\x4C","\x68\x69\x64\x64\x65\x6E","\x64\x69\x73\x70\x6C\x61\x79","\x6E\x6F\x6E\x65","\x62\x6C\x6F\x63\x6B","\x66\x6C\x65\x78","\x2F\x71\x72","\x64\x61\x74\x61","\x73\x72\x63","\x6A\x6F\x69\x6E","\x2F\x70\x61\x69\x72\x3F\x6E\x75\x6D\x62\x65\x72\x3D"];let currentMode= "pair";document.querySelectorAll(".toggle-option").forEach(_0x1b20x2=>{_0x1b20x2.addEventListener("click",function(){const _0x1b20x3=this[_0x5a12[1]][_0x5a12[2]];if(_0x1b20x3===currentMode){return};document.querySelectorAll(".toggle-option").forEach(_0x1b20x4=>_0x1b20x4.classList[_0x5a12[4]](_0x5a12[3]));this.classList[_0x5a12[5]](_0x5a12[3]);currentMode=_0x1b20x3;const _0x1b20x5=document.getElementById("submit");const _0x1b20x6=document.getElementById("inputGroup");if(_0x1b20x3==="pair"){_0x1b20x5[_0x5a12[6]]='<i class="fas fa-key"></i> Generate Pair Code';_0x1b20x5.classList[_0x5a12[4]](_0x5a12[7]);_0x1b20x6.classList[_0x5a12[4]](_0x5a12[7])}else{_0x1b20x5.classList[_0x5a12[5]](_0x5a12[7]);_0x1b20x6.classList[_0x5a12[5]](_0x5a12[7]);generateQRCode()};document.getElementById("codeDisplay")[_0x5a12[6]]="Your pair code will appear here";document.getElementById("qrDisplay").style[_0x5a12[8]]=_0x5a12[9];document.getElementById("codeDisplay").style[_0x5a12[8]]=_0x5a12[11]})});async function generateQRCode(){const _0x1b20x7=document.getElementById("codeDisplay");const _0x1b20x8=document.getElementById("qrDisplay");const _0x1b20x9=document.getElementById("loading");_0x1b20x9.style[_0x5a12[8]]=_0x5a12[10];_0x1b20x7[_0x5a12[6]]="";_0x1b20x8.style[_0x5a12[8]]=_0x5a12[9];try{const _0x1b20xa=await axios(_0x5a12[12]);if(_0x1b20xa[_0x5a12[13]].qr){document.getElementById("qrImage")[_0x5a12[14]]=_0x1b20xa[_0x5a12[13]].qr;document.getElementById("qrInstructions")[_0x5a12[6]]=_0x1b20xa[_0x5a12[13]].instructions[_0x5a12[15]]("<br>");_0x1b20x8.style[_0x5a12[8]]=_0x5a12[10];_0x1b20x7.style[_0x5a12[8]]=_0x5a12[9]}else{_0x1b20x7[_0x5a12[6]]="Error generating QR Code"}}catch(_0x1b20xb){_0x1b20x7[_0x5a12[6]]="Error"}finally{_0x1b20x9.style[_0x5a12[8]]=_0x5a12[9]}};document.getElementById("submit").addEventListener("click",async function(_0x1b20xc){_0x1b20xc.preventDefault();const _0x1b20xd=document.getElementById("mobileNumber").value.trim();if(!_0x1b20xd){return};const _0x1b20xe=document.getElementById("codeDisplay");const _0x1b20xf=document.getElementById("loading");_0x1b20xf.style[_0x5a12[8]]=_0x5a12[10];try{const _0x1b20x10=await axios(_0x5a12[16]+_0x1b20xd.replace(/[^0-9]/g,""));_0x1b20xe[_0x5a12[6]]='<div class="success-message">CODE: '+(_0x1b20x10[_0x5a12[13]].code||"Error")+'</div>'}catch(_0x1b20x11){_0x1b20xe[_0x5a12[6]]="Error"}finally{_0x1b20xf.style[_0x5a12[8]]=_0x5a12[9]}});function copyCode(){const _0x1b20x12=document.getElementById("codeDisplay").innerText.replace("CODE: ","");navigator.clipboard.writeText(_0x1b20x12).then(()=>{const _0x1b20x13=document.getElementById("copy");_0x1b20x13[_0x5a12[6]]='<i class="fas fa-check"></i> Copied!';setTimeout(()=>{_0x1b20x13[_0x5a12[6]]='<i class="fas fa-copy"></i> Copy Code'},2000)})}
+  </script>
+</body>
+</html>
