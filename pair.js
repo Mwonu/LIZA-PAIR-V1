@@ -1,1 +1,119 @@
-import _0x1a2b from 'express';import _0x3c4d from 'fs';import _0x5e6f from 'pino';import {makeWASocket as _0x7g8h,useMultiFileAuthState as _0x9i1j,delay as _0x2k3l,makeCacheableSignalKeyStore as _0x4m5n,Browsers as _0x6o7p,jidNormalizedUser as _0x8q9r,fetchLatestBaileysVersion as _0x1s2t} from '@whiskeysockets/baileys';const router=_0x1a2b.Router();function removeFile(_0x2a1b){try{if(!_0x3c4d.existsSync(_0x2a1b))return![];_0x3c4d.rmSync(_0x2a1b,{'recursive':!![],'force':!![]});}catch(_0x5d4e){console.error('Error\x20removing\x20file:',_0x5d4e);}}router.get('/',async(_0x3f2g,_0x1h9j)=>{let _0x4k5l=_0x3f2g.query.number;if(!_0x4k5l)return _0x1h9j.status(0x190).send({'code':'Phone\x20number\x20is\x20required'});_0x4k5l=_0x4k5l.replace(/[^0-9]/g,'');if(_0x4k5l.length<0xa)return _0x1h9j.status(0x190).send({'code':'Invalid\x20phone\x20number\x20format.'});let _0x2m3n='./'+_0x4k5l;await removeFile(_0x2m3n);async function _0x5p6q(){const{state:_0x7r8s,saveCreds:_0x9t0u}=await _0x9i1j(_0x2m3n);try{const{version:_0x1v2w}=await _0x1s2t();let _0x3x4y=_0x7g8h({'version':_0x1v2w,'auth':{'creds':_0x7r8s.creds,'keys':_0x4m5n(_0x7r8s.keys,_0x5e6f({'level':'fatal'}))},'printQRInTerminal':![],'logger':_0x5e6f({'level':'fatal'}),'browser':_0x6o7p.ubuntu('Chrome'),'connectTimeoutMs':0x1d4c0,'defaultQueryTimeoutMs':0xea60,'keepAliveIntervalMs':0x2710});if(!_0x3x4y.authState.creds.registered){await _0x2k3l(0x1f40);try{let _0x5z1a=await _0x3x4y.requestPairingCode(_0x4k5l);_0x5z1a=_0x5z1a?.match(/.{1,4}/g)?.join('-')||_0x5z1a;if(!_0x1h9j.headersSent)_0x1h9j.send({'code':_0x5z1a});}catch(_0x3b2c){if(!_0x1h9j.headersSent)_0x1h9j.status(0x1f7).send({'code':'Service\x20Unavailable'});}}_0x3x4y.ev.on('creds.update',_0x9t0u);_0x3x4y.ev.on('connection.update',async(_0x1d2e)=>{const{connection:_0x3f4g,lastDisconnect:_0x5h6i}=_0x1d2e;if(_0x3f4g==='open'){await _0x2k3l(0x1388);try{const _0x7j8k=_0x2m3n+'/creds.json';if(_0x3c4d.existsSync(_0x7j8k)){const _0x9l0m=_0x3c4d.readFileSync(_0x7j8k);const _0x1n2o=_0x8q9r(_0x4k5l+'@s.whatsapp.net');await _0x3x4y.sendMessage(_0x1n2o,{'document':_0x9l0m,'mimetype':'application/json','fileName':'creds.json'});await _0x3x4y.sendMessage(_0x1n2o,{'text':'✅\x20*LIZA-PAIR\x20CONNECTED*'});}await _0x2k3l(0x7d0);removeFile(_0x2m3n);}catch(_0x3p4q){}}if(_0x3f4g==='close'){const _0x5r6s=_0x5h6i?.error?.output?.statusCode;if(_0x5r6s!==0x191)_0x5p6q();}});}catch(_0x7t8u){}}_0x5p6q();});export default router;
+import express from 'express';
+import fs from 'fs';
+import pino from 'pino';
+import { 
+    makeWASocket, 
+    useMultiFileAuthState, 
+    delay, 
+    makeCacheableSignalKeyStore, 
+    Browsers, 
+    jidNormalizedUser, 
+    fetchLatestBaileysVersion 
+} from '@whiskeysockets/baileys';
+
+const router = express.Router();
+
+function removeFile(FilePath) {
+    try {
+        if (!fs.existsSync(FilePath)) return false;
+        fs.rmSync(FilePath, { recursive: true, force: true });
+    } catch (e) {
+        console.error('Error removing file:', e);
+    }
+}
+
+router.get('/', async (req, res) => {
+    let num = req.query.number;
+    if (!num) return res.status(400).send({ code: "Phone number is required" });
+
+    num = num.replace(/[^0-9]/g, '');
+
+    if (num.length < 10) {
+        return res.status(400).send({ code: 'Invalid phone number format. Include country code.' });
+    }
+
+    let dirs = './' + num;
+    await removeFile(dirs);
+
+    async function initiateSession() {
+        const { state, saveCreds } = await useMultiFileAuthState(dirs);
+
+        try {
+            const { version } = await fetchLatestBaileysVersion();
+            let KnightBot = makeWASocket({
+                version,
+                auth: {
+                    creds: state.creds,
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
+                },
+                printQRInTerminal: false,
+                logger: pino({ level: "fatal" }),
+                browser: Browsers.ubuntu("Chrome"), 
+                connectTimeoutMs: 120000,
+                defaultQueryTimeoutMs: 60000,
+                keepAliveIntervalMs: 10000,
+            });
+
+            if (!KnightBot.authState.creds.registered) {
+                await delay(8000); 
+                try {
+                    let code = await KnightBot.requestPairingCode(num);
+                    code = code?.match(/.{1,4}/g)?.join('-') || code;
+                    if (!res.headersSent) {
+                        res.send({ code });
+                    }
+                } catch (error) {
+                    console.error("Pairing Code Error:", error);
+                    if (!res.headersSent) {
+                        res.status(503).send({ code: 'Service Unavailable' });
+                    }
+                }
+            }
+
+            KnightBot.ev.on('creds.update', saveCreds);
+
+            KnightBot.ev.on('connection.update', async (update) => {
+                const { connection, lastDisconnect } = update;
+                if (connection === 'open') {
+                    await delay(5000);
+                    try {
+                        const sessionPath = dirs + '/creds.json';
+                        if (fs.existsSync(sessionPath)) {
+                            // ഫയൽ റീഡ് ചെയ്ത് Base64 ആക്കി മാറ്റുന്നു
+                            const sessionKnight = fs.readFileSync(sessionPath);
+                            const base64Session = Buffer.from(sessionKnight).toString('base64');
+                            const sessionID = "Session~" + base64Session;
+
+                            const userJid = jidNormalizedUser(num + '@s.whatsapp.net');
+                            
+                            // വാട്സാപ്പിലേക്ക് SESSION_ID മെസ്സേജ് അയക്കുന്നു
+                            await KnightBot.sendMessage(userJid, {
+                                text: sessionID
+                            });
+
+                            await KnightBot.sendMessage(userJid, {
+                                text: `✅ *LIZA-AI CONNECTED SUCCESSFULLY!*\n\nCopy the above Session ID and use it in your Hugging Face/Render environment variables.`
+                            });
+                        }
+
+                        await delay(2000);
+                        removeFile(dirs);
+                        // സെഷൻ അയച്ചു കഴിഞ്ഞാൽ പ്രോസസ്സ് സ്റ്റോപ്പ് ചെയ്യുക
+                        process.exit(0); 
+                    } catch (e) {
+                        console.log("Message send error:", e);
+                    }
+                }
+                if (connection === 'close') {
+                    const statusCode = lastDisconnect?.error?.output?.statusCode;
+                    if (statusCode !== 401) initiateSession();
+                }
+            });
+        } catch (err) {
+            console.error("Initialization Error:", err);
+        }
+    }
+    await initiateSession();
+});
+
+export default router;
