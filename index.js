@@ -1,1 +1,40 @@
-import _0x53e18a from 'express';import _0x3e18a5 from 'body-parser';import {fileURLToPath as _0x4e18a2} from 'url';import _0x1a18b3 from 'path';import _0x2b18c4 from './pair.js';import _0x3c18d5 from './qr.js';import _0x4d18e6 from 'qrcode';const _0x5e18f7 = _0x53e18a();const _0x1f1808 = _0x4e18a2(import.meta.url);const _0x2f1819 = _0x1a18b3.dirname(_0x1f1808);const _0x3f182a = process.env.PORT || 0x1388;import('events').then(_0x4f183b => {_0x4f183b.EventEmitter.defaultMaxListeners = 0x1f4;});_0x5e18f7.use(_0x3e18a5.json());_0x5e18f7.use(_0x3e18a5.urlencoded({'extended': !![]}));_0x5e18f7.use(_0x53e18a['static'](_0x2f1819));_0x5e18f7.get('/', (_0x5f184c, _0x10185d) => {_0x10185d.sendFile(_0x1a18b3.join(_0x2f1819, 'pair.html'));});_0x5e18f7.use('/pair', _0x2b18c4);_0x5e18f7.use('/qr', _0x3c18d5);_0x5e18f7.listen(_0x3f182a, '0.0.0.0', () => {console.log('\x0a\x0aMADE\x20BY\x20(hank!nd3\x20p4d4y41!\x20\x0a\x0aServer\x20running\x20on\x20http://0.0.0.0:' + _0x3f182a);});export default _0x5e18f7;
+import express from 'express';
+import bodyParser from 'body-parser';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Importing the modules
+import pairRouter from './pair.js';
+import qrRouter from './qr.js';
+import QRCode from 'qrcode';
+
+const app = express();
+
+// Resolve the current directory path in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PORT = process.env.PORT || 5000;
+
+import('events').then(events => {
+    events.EventEmitter.defaultMaxListeners = 500;
+});
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+
+// Routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pair.html'));
+});
+
+app.use('/pair', pairRouter);
+app.use('/qr', qrRouter);
+
+app.listen(PORT, '0.0.0.0', () => { 
+ console.log(`\n\nMADE BY (hank!nd3 p4d4y41! \n\nServer running on http://0.0.0.0:${PORT}`);
+});
+
+export default app;
